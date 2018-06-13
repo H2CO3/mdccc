@@ -26,6 +26,17 @@
 
 extern crate mdccc;
 
+use std::io::{ stdin, stdout };
+use std::io::Read;
+use mdccc::latex::LaTeXIter;
+
 fn main() {
-    println!("MDCCC v{}", env!["CARGO_PKG_VERSION"]);
+    let input = {
+        let mut s = String::new();
+        stdin().read_to_string(&mut s).expect("can't read from stdin");
+        s
+    };
+    let mut iter = LaTeXIter::with_str(&input);
+
+    iter.write_to_io(&mut stdout()).expect("can't write LaTeX to stdout");
 }
