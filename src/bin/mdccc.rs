@@ -33,10 +33,14 @@ use mdccc::latex::LaTeXIter;
 fn main() {
     let input = {
         let mut s = String::new();
-        stdin().read_to_string(&mut s).expect("can't read from stdin");
+        stdin().read_to_string(&mut s).map(drop).unwrap_or_else(
+            |e| eprintln!("can't read from stdin: {}", e)
+        );
         s
     };
     let mut iter = LaTeXIter::with_str(&input);
 
-    iter.write_to_io(&mut stdout()).expect("can't write LaTeX to stdout");
+    iter.write_to_io(&mut stdout()).unwrap_or_else(
+        |e| eprintln!("can't write LaTeX: {}", e)
+    );
 }

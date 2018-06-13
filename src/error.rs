@@ -17,15 +17,24 @@ pub struct Error {
 }
 
 impl Error {
+    /// Instantiate an `Error` using a message.
+    pub fn new<S>(message: S) -> Self
+        where S: Into<Cow<'static, str>>
+    {
+        Error {
+            message: message.into(),
+            cause: None,
+        }
+    }
+
     /// Instantiate an `Error` using a message and a cause.
-    #[allow(trivial_casts)]
-    pub fn new<S, E>(message: S, cause: Option<E>) -> Self
+    pub fn with_cause<S, E>(message: S, cause: E) -> Self
         where S: Into<Cow<'static, str>>,
               E: error::Error + 'static,
     {
         Error {
             message: message.into(),
-            cause: cause.map(|e| Box::new(e) as Box<error::Error>),
+            cause: Some(Box::new(cause)),
         }
     }
 }
@@ -51,13 +60,13 @@ impl error::Error for Error {
 
 impl From<fmt::Error> for Error {
     fn from(error: fmt::Error) -> Self {
-        Self::new("Formatting error", error.into())
+        Self::with_cause("Formatting error", error)
     }
 }
 
 impl From<io::Error> for Error {
     fn from(error: io::Error) -> Self {
-        Self::new("I/O error", error.into())
+        Self::with_cause("I/O error", error)
     }
 }
 

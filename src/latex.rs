@@ -4,7 +4,7 @@ use std::fmt;
 use std::io;
 use std::borrow::Cow;
 use pulldown_cmark::{ Parser, Options, Event };
-use error::Result;
+use error::{ Error, Result };
 
 /// Iterator adapter converting a stream of Markdown events to a stream of LaTeX.
 #[derive(Debug, Clone, Copy)]
@@ -42,14 +42,14 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
         use pulldown_cmark::Event::*;
 
         match event {
-            Start(tag) => unimplemented!(),
-            End(tag) => unimplemented!(),
-            Text(text) => unimplemented!(),
-            Html(_) => unimplemented!(),
-            InlineHtml(_) => unimplemented!(),
-            FootnoteReference(note) => unimplemented!(),
-            SoftBreak => unimplemented!(),
-            HardBreak => unimplemented!(),
+            Start(_tag) => Ok(Default::default()),
+            End(_tag) => Ok(Default::default()),
+            Text(text) => Ok(text), // TODO(H2CO3): LaTeX-escape text
+            Html(_) => Err(Error::new("don't know how to convert HTML to LaTeX")),
+            InlineHtml(_) => Err(Error::new("don't know how to convert HTML to LaTeX")),
+            FootnoteReference(_note) => unimplemented!(),
+            SoftBreak => Ok(Cow::from("\\newline\n")),
+            HardBreak => Ok(Cow::from("\n\n"))
         }
     }
 }
