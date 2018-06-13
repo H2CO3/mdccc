@@ -28,3 +28,4 @@ extern crate pulldown_cmark;
 
 pub mod error;
 pub mod latex;
+pub mod escape;

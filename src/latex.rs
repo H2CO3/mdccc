@@ -3,8 +3,9 @@
 use std::fmt;
 use std::io;
 use std::borrow::Cow;
-use pulldown_cmark::{ Parser, Options, Event };
+use pulldown_cmark::{ Parser, Options, Event, Tag };
 use error::{ Error, Result };
+use escape;
 
 /// Iterator adapter converting a stream of Markdown events to a stream of LaTeX.
 #[derive(Debug, Clone, Copy)]
@@ -42,14 +43,60 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
         use pulldown_cmark::Event::*;
 
         match event {
-            Start(_tag) => Ok(Default::default()),
-            End(_tag) => Ok(Default::default()),
-            Text(text) => Ok(text), // TODO(H2CO3): LaTeX-escape text
+            Start(tag) => Self::start_tag(tag),
+            End(tag) => Self::end_tag(tag),
+            Text(text) => Ok(escape::latex(text)),
             Html(_) => Err(Error::new("don't know how to convert HTML to LaTeX")),
             InlineHtml(_) => Err(Error::new("don't know how to convert HTML to LaTeX")),
-            FootnoteReference(_note) => unimplemented!(),
+            FootnoteReference(_note) => Err(Error::new("don't know how to render footnotes yet")),
             SoftBreak => Ok(Cow::from("\\newline\n")),
             HardBreak => Ok(Cow::from("\n\n"))
+        }
+    }
+
+    /// Convert a Markdown start event to a LaTeX fragment.
+    fn start_tag(tag: Tag) -> Result<Cow<str>> {
+        match tag {
+            Tag::Paragraph => Ok(Default::default()),
+            Tag::Rule => Ok(Default::default()),
+            Tag::Header(_level) => Ok(Default::default()),
+            Tag::BlockQuote => Ok(Default::default()),
+            Tag::CodeBlock(_text) => Ok(Default::default()),
+            Tag::List(_fstidx) => Ok(Default::default()),
+            Tag::Item => Ok(Default::default()),
+            Tag::FootnoteDefinition(_footnote) => Ok(Default::default()),
+            Tag::Table(_alignments) => Ok(Default::default()),
+            Tag::TableHead => Ok(Default::default()),
+            Tag::TableRow => Ok(Default::default()),
+            Tag::TableCell => Ok(Default::default()),
+            Tag::Emphasis => Ok(Cow::from(r"\textit{")),
+            Tag::Strong => Ok(Cow::from(r"\textbf{")),
+            Tag::Code => Ok(Default::default()),
+            Tag::Link(_url, _label) => Ok(Default::default()),
+            Tag::Image(_url, _label) => Ok(Default::default()),
+        }
+    }
+
+    /// Convert a Markdown end event to a LaTeX fragment.
+    fn end_tag(tag: Tag) -> Result<Cow<str>> {
+        match tag {
+            Tag::Paragraph => Ok(Default::default()),
+            Tag::Rule => Ok(Default::default()),
+            Tag::Header(_level) => Ok(Default::default()),
+            Tag::BlockQuote => Ok(Default::default()),
+            Tag::CodeBlock(_text) => Ok(Default::default()),
+            Tag::List(_fstidx) => Ok(Default::default()),
+            Tag::Item => Ok(Default::default()),
+            Tag::FootnoteDefinition(_footnote) => Ok(Default::default()),
+            Tag::Table(_alignments) => Ok(Default::default()),
+            Tag::TableHead => Ok(Default::default()),
+            Tag::TableRow => Ok(Default::default()),
+            Tag::TableCell => Ok(Default::default()),
+            Tag::Emphasis => Ok(Cow::from("}")),
+            Tag::Strong => Ok(Cow::from("}")),
+            Tag::Code => Ok(Default::default()),
+            Tag::Link(_url, _label) => Ok(Default::default()),
+            Tag::Image(_url, _label) => Ok(Default::default()),
         }
     }
 }
