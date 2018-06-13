@@ -27,20 +27,25 @@
 extern crate mdccc;
 
 use std::io::{ stdin, stdout };
+use std::process::exit;
 use std::io::Read;
 use mdccc::latex::LaTeXIter;
 
 fn main() {
     let input = {
         let mut s = String::new();
-        stdin().read_to_string(&mut s).map(drop).unwrap_or_else(
-            |e| eprintln!("can't read from stdin: {}", e)
-        );
+
+        stdin().read_to_string(&mut s).map(drop).unwrap_or_else(|e| {
+            eprintln!("can't read from stdin: {}", e);
+            exit(1);
+        });
+
         s
     };
-    let mut iter = LaTeXIter::with_str(&input);
+    let iter = LaTeXIter::with_str(&input);
 
-    iter.write_to_io(&mut stdout()).unwrap_or_else(
-        |e| eprintln!("can't write LaTeX: {}", e)
-    );
+    iter.write_to_io(&mut stdout()).unwrap_or_else(|e| {
+        eprintln!("can't write LaTeX: {}", e);
+        exit(1);
+    });
 }

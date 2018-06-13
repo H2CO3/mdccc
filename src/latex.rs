@@ -21,7 +21,7 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
     }
 
     /// Convenience method for writing all output to an `fmt::Write`.
-    pub fn write_to_fmt<W: fmt::Write>(&mut self, dest: &mut W) -> Result<()> {
+    pub fn write_to_fmt<W: fmt::Write>(self, dest: &mut W) -> Result<()> {
         for string in self {
             dest.write_str(&string?)?
         }
@@ -30,7 +30,7 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
     }
 
     /// Convenience method for writing all output to an `io::Write`.
-    pub fn write_to_io<W: io::Write>(&mut self, dest: &mut W) -> Result<()> {
+    pub fn write_to_io<W: io::Write>(self, dest: &mut W) -> Result<()> {
         for string in self {
             dest.write_all(string?.as_bytes())?
         }
