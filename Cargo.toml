@@ -1,0 +1,15 @@
+[package]
+name          = "mdccc"
+version       = "0.1.0" # remember to update html_root_url in lib.rs and mdccc.rs
+authors       = ["Árpád Goretity <h2co3@h2co3.org>"]
+repository    = "https://github.com/H2CO3/mdccc"
+homepage      = "https://h2co3.github.io/mdccc"
+license       = "MIT"
+readme        = "README.md"
+documentation = "https://docs.rs/mdccc"
+description   = "Markdown Compiler-Compiler-Compiler"
+keywords      = ["markdown", "LaTeX", "document", "text", "compiler"]
+categories    = ["command-line-utilities", "development-tools", "encoding", "parser-implementations", "text-processing"]
+
+[dependencies]
+pulldown-cmark = "0.1.2"
