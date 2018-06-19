@@ -12,12 +12,22 @@ use escape;
 pub struct LaTeXIter<'a, T: Iterator<Item=Event<'a>>> {
     /// The iterator being wrapped.
     events: T,
+    /// Whether the document prologue should be emitted.
+    emit_prologue: bool,
+    /// Whether the document epilogue should be emitted.
+    emit_epilogue: bool,
 }
 
 impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
     /// Wrap a Markdown `Event` iterator, turning it into a LaTeX stream.
-    pub fn new(events: T) -> Self {
-        LaTeXIter { events }
+    /// If `wrap_document` is true, a document prologue and epilogue will
+    /// be emitted before and after the generated LaTeX code.
+    pub fn new(events: T, wrap_document: bool) -> Self {
+        LaTeXIter {
+            events: events,
+            emit_prologue: wrap_document,
+            emit_epilogue: wrap_document,
+        }
     }
 
     /// Convenience method for writing all output to an `fmt::Write`.
@@ -57,9 +67,16 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
     /// Convert a Markdown start event to a LaTeX fragment.
     fn start_tag(tag: Tag) -> Result<Cow<str>> {
         match tag {
-            Tag::Paragraph => Ok(Default::default()),
-            Tag::Rule => Ok(Default::default()),
-            Tag::Header(_level) => Ok(Default::default()),
+            Tag::Paragraph => Ok(Cow::from("\n\n")),
+            Tag::Rule => Ok(Cow::from("\n\n\\hrulefill\n\n")),
+            Tag::Header(level) => Ok(Cow::from(match level {
+                1 => r"\textbf{\Huge ",
+                2 => r"\textbf{\huge ",
+                3 => r"\textbf{\LARGE ",
+                4 => r"\textbf{\Large ",
+                5 => r"\textbf{\large ",
+                _ => r"\textbf{\normalsize ",
+            })),
             Tag::BlockQuote => Ok(Default::default()),
             Tag::CodeBlock(_text) => Ok(Default::default()),
             Tag::List(_fstidx) => Ok(Default::default()),
@@ -80,9 +97,9 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
     /// Convert a Markdown end event to a LaTeX fragment.
     fn end_tag(tag: Tag) -> Result<Cow<str>> {
         match tag {
-            Tag::Paragraph => Ok(Default::default()),
+            Tag::Paragraph => Ok(Cow::default()),
             Tag::Rule => Ok(Default::default()),
-            Tag::Header(_level) => Ok(Default::default()),
+            Tag::Header(_level) => Ok(Cow::from("}\n\n")),
             Tag::BlockQuote => Ok(Default::default()),
             Tag::CodeBlock(_text) => Ok(Default::default()),
             Tag::List(_fstidx) => Ok(Default::default()),
@@ -102,10 +119,10 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
 }
 
 impl<'a> LaTeXIter<'a, Parser<'a>> {
-    /// Create a LaTeX event iterator from a Markdown string,
-    /// with all `Parser` options enabled.
+    /// Create a LaTeX event iterator from a Markdown string, with all `Parser`
+    /// options enabled, emitting a document prologue and epilogue.
     pub fn with_str(string: &'a str) -> Self {
-        Self::new(Parser::new_ext(string, Options::all()))
+        Self::new(Parser::new_ext(string, Options::all()), true)
     }
 }
 
@@ -113,6 +130,54 @@ impl<'a, T: Iterator<Item=Event<'a>>> Iterator for LaTeXIter<'a, T> {
     type Item = Result<Cow<'a, str>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.events.next().map(Self::md_to_latex)
+        if self.emit_prologue {
+            self.emit_prologue = false;
+            return Some(Ok(Cow::from(DOCUMENT_PROLOGUE)));
+        }
+
+        if let Some(event) = self.events.next() {
+            return Some(Self::md_to_latex(event));
+        }
+
+        if self.emit_epilogue {
+            self.emit_epilogue = false;
+            return Some(Ok(Cow::from(DOCUMENT_EPILOGUE)));
+        }
+
+        None
     }
 }
+
+/// The optional document prologue.
+static DOCUMENT_PROLOGUE: &str = r"
+\documentclass[fontisze=11pt]{scrreprt}
+
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[onehalfspacing]{setspace}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage[style=english]{csquotes}
+\usepackage{listings}
+\usepackage[format=plain,font=footnotesize]{caption}
+
+\lstset{
+  columns=fixed,
+  basicstyle=\ttfamily\color{black},
+  basewidth=0.5em,
+  breaklines=true,
+  frame=leftline,
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\color{mygreen},
+  keywordstyle=\color{blue},
+  commentstyle=\color{mygray},
+  showspaces=false,
+  showstringspaces=false,
+  stringstyle=\color{orange},
+}
+
+\begin{document}
+";
+/// The optional document epilogue.
+static DOCUMENT_EPILOGUE: &str = r"\end{document}";
