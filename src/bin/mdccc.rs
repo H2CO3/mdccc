@@ -32,16 +32,14 @@ use mdccc::error::Result;
 use mdccc::latex::LaTeXIter;
 
 fn mdccc_main() -> Result<()> {
-    let input = {
-        let mut s = String::new();
-        stdin().read_to_string(&mut s)?;
-        s
-    };
-    let iter = LaTeXIter::with_str(&input);
-
-    iter.write_to_io(&mut stdout())
+    let mut input = String::new();
+    stdin().read_to_string(&mut input)?;
+    LaTeXIter::with_str(&input).write_to_io(&mut stdout())
 }
 
 fn main() {
-    mdccc_main().unwrap_or_else(|e| eprintln!("{}", e));
+    mdccc_main().unwrap_or_else(|e| {
+        eprintln!("{}", e);
+        std::process::exit(1);
+    });
 }
