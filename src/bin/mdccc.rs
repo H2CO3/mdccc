@@ -40,6 +40,7 @@ fn mdccc_main() -> Result<()> {
 fn main() {
     mdccc_main().unwrap_or_else(|e| {
         eprintln!("{}", e);
+        drop(e);
         std::process::exit(1);
     });
 }
