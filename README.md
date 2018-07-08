@@ -10,3 +10,21 @@
 MDCCC is a Markdown to LaTeX renderer. It's not a compiler compiler compiler;
 it's not even a compiler compiler, but I find the expression oddly satisfying.
 It's also the Roman numeral for 1800.
+
+## Usage of the library
+
+The basic idea: there's a `LaTeXIter` type, which is an iterator adaptor. It
+consumes an `Iterator` over Markdown `Event`s (as defined by the
+`pulldown_cmark` crate), and outputs a stream of LaTeX string fragments.
+Hopefully its documentation is good enough so that you'll be able to figure
+out the rest. See `src/bin/mdccc.rs` for the *very simple* example usage.
+
+## Usage of the CLI tool
+
+The crate comes with a command-line utility, `mdccc`, which is very easy to
+use. In the spirit of Unix, all it does is it reads Markdown from `stdin`
+and spits out LaTeX to `stdout` like a filter. You can therefore do something
+like this in order to convert a Markdown file to a PDF:
+
+    mdccc < input.md > output.tex
+    pdflatex output.tex
