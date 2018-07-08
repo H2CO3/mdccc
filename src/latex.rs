@@ -88,7 +88,7 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
             Tag::TableCell => Ok(Default::default()),
             Tag::Emphasis => Ok(Cow::from(r"\textit{")),
             Tag::Strong => Ok(Cow::from(r"\textbf{")),
-            Tag::Code => Ok(Default::default()),
+            Tag::Code => Ok(Cow::from(r"\texttt{")),
             Tag::Link(_url, _label) => Ok(Default::default()),
             Tag::Image(_url, _label) => Ok(Default::default()),
         }
@@ -98,7 +98,7 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
     fn end_tag(tag: Tag) -> Result<Cow<str>> {
         match tag {
             Tag::Paragraph => Ok(Cow::default()),
-            Tag::Rule => Ok(Default::default()),
+            Tag::Rule => Ok(Cow::default()),
             Tag::Header(_level) => Ok(Cow::from("}\n\n")),
             Tag::BlockQuote => Ok(Default::default()),
             Tag::CodeBlock(_text) => Ok(Default::default()),
@@ -111,7 +111,7 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
             Tag::TableCell => Ok(Default::default()),
             Tag::Emphasis => Ok(Cow::from("}")),
             Tag::Strong => Ok(Cow::from("}")),
-            Tag::Code => Ok(Default::default()),
+            Tag::Code => Ok(Cow::from("}")),
             Tag::Link(_url, _label) => Ok(Default::default()),
             Tag::Image(_url, _label) => Ok(Default::default()),
         }

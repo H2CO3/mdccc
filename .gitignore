@@ -1,4 +1,8 @@
-
+*.tex
+*.aux
+*.log
+*.out
+*.pdf
 /target/
 **/*.rs.bk
 Cargo.lock
