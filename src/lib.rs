@@ -1,6 +1,6 @@
 //! # MDCCC, a Markdown-to-LaTeX renderer
 
-#![doc(html_root_url = "https://docs.rs/mdccc/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/mdccc/0.1.1")]
 #![deny(missing_debug_implementations, missing_copy_implementations,
         trivial_casts, trivial_numeric_casts,
         unsafe_code,

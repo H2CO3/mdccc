@@ -1,6 +1,6 @@
 [package]
 name          = "mdccc"
-version       = "0.1.0" # remember to update html_root_url in lib.rs and mdccc.rs
+version       = "0.1.1" # remember to update html_root_url in lib.rs and mdccc.rs
 authors       = ["Árpád Goretity <h2co3@h2co3.org>"]
 repository    = "https://github.com/H2CO3/mdccc"
 homepage      = "https://h2co3.github.io/mdccc"
