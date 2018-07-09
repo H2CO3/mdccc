@@ -79,8 +79,12 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
             })),
             Tag::BlockQuote => Ok(Default::default()),
             Tag::CodeBlock(_text) => Ok(Default::default()),
-            Tag::List(_fstidx) => Ok(Default::default()),
-            Tag::Item => Ok(Default::default()),
+            Tag::List(fstidx) => match fstidx {
+                None => Ok(Cow::from("\\begin{itemize}\n")),
+                Some(1) => Ok(Cow::from("\\begin{enumerate}\n")),
+                Some(_) => Err(Error::new("Ordered lists starting at an index other than 1 are not yet supported")),
+            },
+            Tag::Item => Ok(Cow::from(r"\item{")),
             Tag::FootnoteDefinition(_footnote) => Ok(Default::default()),
             Tag::Table(_alignments) => Ok(Default::default()),
             Tag::TableHead => Ok(Default::default()),
@@ -102,8 +106,12 @@ impl<'a, T: Iterator<Item=Event<'a>>> LaTeXIter<'a, T> {
             Tag::Header(_level) => Ok(Cow::from("}\n\n")),
             Tag::BlockQuote => Ok(Default::default()),
             Tag::CodeBlock(_text) => Ok(Default::default()),
-            Tag::List(_fstidx) => Ok(Default::default()),
-            Tag::Item => Ok(Default::default()),
+            Tag::List(fstidx) => Ok(if fstidx.is_some() {
+                Cow::from("\\end{enumerate}\n")
+            } else {
+                Cow::from("\\end{itemize}\n")
+            }),
+            Tag::Item => Ok(Cow::from("}\n")),
             Tag::FootnoteDefinition(_footnote) => Ok(Default::default()),
             Tag::Table(_alignments) => Ok(Default::default()),
             Tag::TableHead => Ok(Default::default()),
